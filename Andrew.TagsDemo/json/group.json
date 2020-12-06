@@ -1,0 +1,15 @@
+{
+  "name": "color",
+  "scope": "system | shop",
+  "shopId": 9527,
+
+  "display-name": {
+    "zh-TW": "顏色",
+    "en-US": "COLOR"
+  },
+
+  "display-description": {
+    "zh-TW": "商品顏色",
+    "en-US": "Color of Product"
+  }
+}

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 
 namespace Andrew.TagsDemo
 {
@@ -24,47 +25,98 @@ namespace Andrew.TagsDemo
         public string Name { get; private set; }
 
 
+        // 使用範圍: SYSTEM (系統內部使用) | TENANT (商店維度使用)
+        public string Scope;
+
+        public string Market; // TW | MY | PX | HK
+
+        public long ShopID; // 0 if not specified
+
+        public bool IsArchived;
+
+        public int MaxOccurance; // 同一個主體 (entity) 最多能標示幾個該群組的標籤?
+
+
+        #region configuration
 
         // 是否允許自訂 tags? (若不支援，則只能使用 pre-defined tags)
         public bool AllowCustTags = false;
 
+        public bool IsDisplay = false;
+
         // 是否支援多國語顯示?
+        public bool IsMUI = false;
 
-        // 用途說明
+        #endregion
 
-        public IEnumerable<TagKey> GetTags()
-        {
-            throw new ArgumentException();
-        }
+
+        // 如果支援自訂 tags, 則啟用 tags 的 CRUD helper method, 同時支援 tags CRUD events
+        // description
+        public MUIText Description;
+
+        // display
+        public MUIText DisplayName;
     }
+
+
+
 
     //  多國語 (只有 tag group 允許才支援)
     //  列舉檢查 (只有 tag group 不允許自訂 value 才支援)
     public class TagKey
     {
+        // need detect current culture info
+
+        // need detect current track context
+
+
         private readonly TagGroup _group;
 
-        public string Name { get { return this._group.Name; } }
+        public string Group { get { return this._group.Name; } }
+
+        public string Key { get; private set; }
+
+        // 能直接附加在 entity 上的 tag.value, 例如 "color::RED", "size::XL"
         public string Value { get; private set; }
 
-        public string FullName
+        public bool IsArchived;
+
+        // description
+        public MUIText Description;
+
+        // display
+        public MUIText DisplayKey;
+
+    }
+
+    public class MUIText
+    {
+        private string _default;
+        private Dictionary<string, string> _mapping = new Dictionary<string, string>();
+
+        public MUIText()
         {
-            get
-            {
-                return $"{this.Name}::{this.Value}";
-            }
+
         }
 
-        // option(s)
-
-        // 1. 直接顯示 value (預設值)
-        // 2. 顯示 display 屬性 (固定語系)
-        // 3. 顯示 display 屬性 (多國語系)
-        public string Display { get; }  // show multilingual if available
-
-
-        // 1. 顯示 description (固定語系)
-        // 2. 顯示 description (多國語系)
-        public string Description { get; }
+        public override string ToString()
+        {
+            return this.ToString(CultureInfo.CurrentUICulture);
+        }
+        public string ToString(CultureInfo culture)
+        {
+            if (this._mapping.ContainsKey(culture.Name))
+            {
+                return this._mapping[culture.Name];
+            }
+            else if (this._mapping.ContainsKey(culture.Parent.Name))
+            {
+                return this._mapping[culture.Parent.Name];
+            }
+            else
+            {
+                return this._default;
+            }
+        }
     }
 }
