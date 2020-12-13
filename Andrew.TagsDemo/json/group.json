@@ -3,6 +3,9 @@
   "scope": "system | shop",
   "shopId": 9527,
 
+  "features": {
+    "flag.search.visible": true
+  },
   "display-name": {
     "zh-TW": "ÃC¦â",
     "en-US": "COLOR"
