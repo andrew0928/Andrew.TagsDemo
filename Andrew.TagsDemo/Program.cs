@@ -9,7 +9,7 @@ namespace Andrew.TagsDemo
     {
         static void Main(string[] args)
         {
-            var tagrepo = new TagsRepo(8, "zh-TW"); // should be resolved from DI container.
+            IReadOnlyTagsRepo tagrepo = new TagsRepo(8, "zh-TW"); // should be resolved from DI container.
 
 
             #region call search API
@@ -45,8 +45,39 @@ namespace Andrew.TagsDemo
         }
     }
 
+    public interface IReadOnlyTagsRepo
+    {
+        public IEnumerable<string> GetTagGroupNames();
+        public IEnumerable<string> GetTagKeyNames(string tagGroupName);
 
-    public class TagsRepo
+        public TagGroup GetTagGroupByName(string tagGroupName);
+
+        public TagKey GetTagKeyByValue(string tagValue);
+
+
+        public IEnumerable<TagKey> GetTagKeysByGroupName(string tagGroupName)
+        {
+            foreach(var key in this.GetTagKeyNames(tagGroupName))
+            {
+                yield return this.GetTagKeyByValue($"{tagGroupName}::{key}");
+            }
+        }
+
+        public IEnumerable<(TagGroup group, TagKey key, int count)> BulkLoadTagKeysByValue(IEnumerable<(string value, int count)> search_results)
+        {
+            foreach (var result in search_results)
+            {
+                yield return
+                    (
+                        this.GetTagGroupByName(result.value.Split("::")[0]),
+                        this.GetTagKeyByValue(result.value),
+                        result.count
+                    );
+            }
+        }
+    }
+
+    public class TagsRepo : IReadOnlyTagsRepo
     {
         private int _shopId = 0;
         private string _langId = null;
@@ -72,10 +103,10 @@ namespace Andrew.TagsDemo
             throw new NotImplementedException();
         }
 
-        public IEnumerable<TagKey> GetTagKeysByGroupName(string tagGroupName)
-        {
-            throw new NotImplementedException();
-        }
+        //public IEnumerable<TagKey> GetTagKeysByGroupName(string tagGroupName)
+        //{
+        //    throw new NotImplementedException();
+        //}
 
         public TagKey GetTagKeyByValue(string tagValue)
         {
@@ -85,18 +116,18 @@ namespace Andrew.TagsDemo
 
         #region Helper Extensions
 
-        public IEnumerable<(TagGroup group, TagKey key, int count)> BulkLoadTagKeysByValue(IEnumerable<(string value, int count)> search_results)
-        {
-            foreach(var result in search_results)
-            {
-                yield return
-                    (
-                        this.GetTagGroupByName(result.value.Split("::")[0]),
-                        this.GetTagKeyByValue(result.value),
-                        result.count
-                    );
-            }
-        }
+        //public IEnumerable<(TagGroup group, TagKey key, int count)> BulkLoadTagKeysByValue(IEnumerable<(string value, int count)> search_results)
+        //{
+        //    foreach(var result in search_results)
+        //    {
+        //        yield return
+        //            (
+        //                this.GetTagGroupByName(result.value.Split("::")[0]),
+        //                this.GetTagKeyByValue(result.value),
+        //                result.count
+        //            );
+        //    }
+        //}
 
 
         #endregion
